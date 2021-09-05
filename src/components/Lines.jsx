@@ -3,7 +3,9 @@ import * as THREE from 'three';
 import oc from 'three-orbit-controls'
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
-import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
+import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls.js'
+
 
 const OrbitControls = oc(THREE)
 
@@ -19,11 +21,11 @@ export default class Lines extends React.Component {
             camera.position.set( 0, 0, 20 );
 
             scene = new THREE.Scene();
-
-            const curveWidth = 4,
-            curveHeight = 0.5,
-            bottomControlOffset = 4.4,
-            topControlOffset = 4.4,
+            const multiple = 8;
+            const curveWidth = 4*multiple,
+            curveHeight = 0.5*multiple,
+            bottomControlOffset = 4.4*multiple,
+            topControlOffset = 4.4*multiple,
             numOfCurves = 120,
             curvesArr = [],
             pointsArr = [],
@@ -56,16 +58,72 @@ export default class Lines extends React.Component {
                 curvesArr.push(name)
                 pointsArr.push(name.getPoints( 50 ))
                 pointsArr[i].forEach(ele => {allPointsArr.push(ele.x, ele.y, 0)});
-            } 
+            }
 
+            const group = new THREE.Group();
             const geometry = new LineGeometry();
-           //geometry.setPositions( pts_arr );
-            geometry.setPositions( allPointsArr ); 
-            const material = new LineMaterial( { color: 0xffffff, linewidth: 2 } );
-            material.resolution.set( window.innerWidth, window.innerHeight )
+            //geometry.setPositions( pts_arr );
+                geometry.setPositions( allPointsArr );
+                const material = new LineMaterial( { color: 0xffffff, linewidth: 2 } );
+                material.resolution.set( window.innerWidth, window.innerHeight )
+                const lines = new Line2( geometry, material );
+                group.add(lines);
 
-            const lines = new Line2( geometry, material );
-            scene.add( lines );
+            const loader = new THREE.FontLoader();
+            const helvetica = 'https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json'
+            loader.load( helvetica, function ( font ) {
+            //https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json        
+
+                    const walTxt = 'Walk43';
+                    const geometryTxt = new THREE.TextGeometry(walTxt, {
+                        font: font,
+                        size: 24,
+                        height: 5,
+                        curveSegments: 12,
+                        bevelEnabled: false,
+                        bevelThickness: 1,
+                        bevelSize: 8,
+                        bevelSegments: 5
+                    });
+                    geometryTxt.rotateZ(-Math.PI/2);
+                    const materialTxt = new THREE.MeshBasicMaterial( {color: 0x0000ff} )
+                    const texts = new THREE.Mesh(geometryTxt, materialTxt)
+                    texts.position.x = -190
+                    texts.position.y = 270
+                    geometryTxt.translate( 0,-100,0)
+                    // texts.position.set(0, 200, 0);
+                    // camera.position.set(300,300,300);
+                    // camera.lookAt(lines.position);
+
+                    group.add(texts);
+            } );
+
+            loader.load( helvetica, function ( font ) {
+                //https://cdn.rawgit.com/mrdoob/three.js/master/examples/fonts/helvetiker_regular.typeface.json        
+    
+                        const walTxt = 'Walk41';
+                        const geometryTxt = new THREE.TextGeometry(walTxt, {
+                            font: font,
+                            size: 5,
+                            height: 5,
+                            curveSegments: 12,
+                            bevelEnabled: false,
+                            bevelThickness: 1,
+                            bevelSize: 8,
+                            bevelSegments: 5
+                        });
+                        const materialTxt = new THREE.MeshBasicMaterial( {color: 0x61DFFF} )
+                        const texts = new THREE.Mesh(geometryTxt, materialTxt)
+                        texts.position.set(0, 2, 0);
+                        texts.position.x = -150
+                        texts.position.y = 220
+                        // camera.position.set(300,300,300);
+                        // camera.lookAt(lines.position);
+                        geometryTxt.translate( 0,-100,0)
+                        group.add(texts);
+                } );
+            geometry.translate( 0,-100,0)    
+            scene.add(group);
 
             renderer = new THREE.WebGLRenderer( { antialias: true } );
             renderer.setPixelRatio( window.devicePixelRatio );
@@ -75,8 +133,8 @@ export default class Lines extends React.Component {
             const controls = new OrbitControls( camera, renderer.domElement );
             controls.minDistance = 10;
             controls.maxDistance = Infinity;
-            controls.minPolarAngle = Math.PI/2;
-            controls.maxPolarAngle = Math.PI; 
+            // controls.minPolarAngle = Math.PI/2;
+            // controls.maxPolarAngle = Math.PI; 
         }
 
         function animate() {
